@@ -24,6 +24,14 @@ def test_read_tasks():
     assert isinstance(response.json(), list)
 
 
+def test_get_existing_task():
+    create = client.post("/tasks/", json={"title": "Fetch me"})
+    task_id = create.json()["id"]
+    response = client.get(f"/tasks/{task_id}")
+    assert response.status_code == 200
+    assert response.json()["title"] == "Fetch me"
+
+
 def test_get_nonexistent_task():
     response = client.get("/tasks/9999")
     assert response.status_code == 404
@@ -37,8 +45,18 @@ def test_update_task():
     assert response.json()["completed"] is True
 
 
+def test_update_nonexistent_task():
+    response = client.put("/tasks/9999", json={"title": "Ghost"})
+    assert response.status_code == 404
+
+
 def test_delete_task():
     create = client.post("/tasks/", json={"title": "To be deleted"})
     task_id = create.json()["id"]
     response = client.delete(f"/tasks/{task_id}")
     assert response.status_code == 204
+
+
+def test_delete_nonexistent_task():
+    response = client.delete("/tasks/9999")
+    assert response.status_code == 404
